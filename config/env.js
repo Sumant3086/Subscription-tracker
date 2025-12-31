@@ -4,6 +4,6 @@ export const {
     PORT, 
     NODE_ENV, 
     DB_URI, 
-    JWT_SECRET = "fallback-secret-key", 
-    JWT_EXPIRES_IN = "7d"
+    JWT_SECRET = "secret", 
+    JWT_EXPIRES_IN = "1d"
 }=process.env;
