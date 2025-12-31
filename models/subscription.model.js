@@ -11,20 +11,21 @@ const subscriptionSchema=new mongoose.Schema({
         type:Number,
         required:[true, 'Subscription price needed'], 
         min:[0,' Price must be greater than 0'],
-        max:[1000, 'Price must be smaller than 1000']  
+        max:[10000, 'Price must be smaller than 10000']  
     },
     currency:{
         type:String,
         enum:['INR','EUR','USD'],
-        default:'INR'
+        default:'USD'
     },
     frequency:{
         type:String,
-        enum:['daily','monthly','yearly']
+        enum:['daily','monthly','yearly'],
+        required:true
     },
     category:{
         type:String,
-        enum:['sports','news','tech'], 
+        enum:['sports','news','tech','entertainment','productivity','health','finance'], 
         required:true
     },
     payment:{
@@ -34,26 +35,15 @@ const subscriptionSchema=new mongoose.Schema({
     },
     status:{
         type:String,
-        enum:['active','cancle','expired'],
+        enum:['active','cancelled','expired'],
         default:'active' 
     },
     startDate:{
         type:Date,
-        required:true,
-        validate:{
-            validator:(val)=>val<=new Date(),
-            message:'Start date must be in the past',
-        }
+        required:true
     },
     renewalDate:{
-        type:Date,
-        required:true,
-        validate:{
-            validator:function(val){
-                return val>this.startDate;
-            }, 
-            message:'Renewal date must be in the past',
-        }
+        type:Date
     },
     userId:{
         type:mongoose.Schema.Types.ObjectId, 
@@ -63,21 +53,17 @@ const subscriptionSchema=new mongoose.Schema({
     }
 },{timestamps:true});
 
-subscriptionSchema.pre('save',function(next){
-    if(!this.renewalDate){
-        const renewalPeriods={
-            daily:1,
-            weekly:7,
-            monthly:30,
-            yearly:365,
+subscriptionSchema.pre('save', async function() {
+    if (!this.renewalDate) {
+        const renewalPeriods = {
+            daily: 1,
+            monthly: 30,
+            yearly: 365,
         };
-        this.renewalDate=new Date(this.startDate);
-        this.renewalDate.setDate(this.renewalDate.getDate()+renewalPeriods[this.frequency]);
+        this.renewalDate = new Date(this.startDate);
+        this.renewalDate.setDate(this.renewalDate.getDate() + renewalPeriods[this.frequency]);
     }
-    if(this.renewalDate<new Date()){
-        this.status='expired';
-    }
-    next();
-})
+});
+
 const Subscription=mongoose.model('Subscription',subscriptionSchema);
 export default Subscription;

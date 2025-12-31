@@ -4,6 +4,7 @@ import jwt from 'jsonwebtoken';
 
 import User from '../models/user.model.js';
 import { JWT_EXPIRES_IN, JWT_SECRET } from '../config/env.js';
+import { sendWelcomeEmail } from '../services/emailService.js';
 
 export const signUp=async(req,res,next)=>{
     const session=await mongoose.startSession();
@@ -27,6 +28,11 @@ export const signUp=async(req,res,next)=>{
     const token=jwt.sign({userId:newUser[0]._id},JWT_SECRET,{expiresIn:JWT_EXPIRES_IN});
         await session.commitTransaction();
         session.endSession();   
+
+        // Send welcome email (don't wait for it)
+        sendWelcomeEmail(email, name).catch(err => 
+            console.error('Welcome email failed:', err)
+        );
 
         res.status(201).json({
             success:true,
@@ -52,9 +58,9 @@ export const signUp=async(req,res,next)=>{
 export const signIn = async (req, res, next) => {
     try {
         const { email, password } = req.body;
-        console.log({email,password});
+        
         const user = await User.findOne({ email });
-        console.log(user);
+        
         if (!user) {
             const error = new Error('User not found');
             error.statusCode = 404;

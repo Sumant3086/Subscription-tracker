@@ -10,13 +10,9 @@ const authorize = async (req, res, next) => {
             token = req.headers.authorization.split(' ')[1];
         }
 
-        console.log('Token received:', token);
-        console.log('JWT_SECRET being used:', JWT_SECRET);
-
         if (!token) return res.status(401).json({ message: 'Unauthorized' });
 
         const decoded = jwt.verify(token, JWT_SECRET);
-        console.log('Token decoded successfully:', decoded);
 
         const user = await User.findById(decoded.userId);
 
@@ -27,7 +23,6 @@ const authorize = async (req, res, next) => {
         next();
 
     } catch (error) {
-        console.log('Auth error:', error.message);
         return res.status(401).json({ message: 'Unauthorized', error: error.message });
     }
 };

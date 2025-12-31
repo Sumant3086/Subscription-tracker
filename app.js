@@ -9,6 +9,7 @@ import userRouter from './routes/user.routes.js';
 import connectToDatabase from './database/mongodb.js';
 import errorMiddleware from './middleswares/error.middleware.js';
 import { generalLimiter } from './middleswares/rateLimiter.middleware.js';
+import { startCronJobs } from './services/cronService.js';
 
 const app = express();
 
@@ -22,10 +23,6 @@ app.use(cookieParser());
 app.use('/api/v1/auth',authRouter);
 app.use('/api/v1/users',userRouter);
 app.use('/api/v1/subscriptions',subscriptionRouter);
-app.use(errorMiddleware);
-
-console.log('PORT from env:', PORT);
-console.log('NODE_ENV:', process.env.NODE_ENV);
 
 app.get('/', (req, res) => {
   res.send('Welcome to the Subscription Tracker API!');
@@ -39,9 +36,18 @@ app.use('*', (req, res) => {
   });
 });
 
+// Error middleware must be last
+app.use(errorMiddleware);
+
+console.log('PORT from env:', PORT);
+console.log('NODE_ENV:', process.env.NODE_ENV);;
+
 app.listen(PORT, async() => {
   console.log(`Subscription Tracker API is running on http://localhost:${PORT}`);
   await connectToDatabase();
+  
+  // Start cron jobs for email reminders
+  startCronJobs();
 });
 
 export default app;

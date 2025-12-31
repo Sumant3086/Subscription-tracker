@@ -1,4 +1,4 @@
-const errorMiddleware=(err,req,res,next)=>{
+const errorMiddleware = (err, req, res, next) => {
     console.error('Error caught:', err);
     
     let error = { ...err };
@@ -20,7 +20,7 @@ const errorMiddleware=(err,req,res,next)=>{
         error.statusCode = 400;
     }
     
-    res.status(error.statusCode || 500).json({
+    return res.status(error.statusCode || 500).json({
         success: false,
         error: error.message || 'Server Error'
     });

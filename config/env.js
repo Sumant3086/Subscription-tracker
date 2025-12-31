@@ -5,5 +5,10 @@ export const {
     NODE_ENV, 
     DB_URI, 
     JWT_SECRET = "secret", 
-    JWT_EXPIRES_IN = "1d"
+    JWT_EXPIRES_IN = "1d",
+    EMAIL_HOST,
+    EMAIL_PORT,
+    EMAIL_USER,
+    EMAIL_PASS,
+    EMAIL_FROM
 }=process.env;

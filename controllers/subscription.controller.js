@@ -1,13 +1,30 @@
 import Subscription from '../models/subscription.model.js';
 
-// Get all subscriptions
+// Get all subscriptions with analytics
 export const getSubscriptions = async (req, res, next) => {
     try {
         const subscriptions = await Subscription.find({ userId: req.user._id }).populate('userId', 'name email');
         
+        // Calculate analytics
+        const analytics = {
+            total: subscriptions.length,
+            active: subscriptions.filter(sub => sub.status === 'active').length,
+            expired: subscriptions.filter(sub => sub.status === 'expired').length,
+            cancelled: subscriptions.filter(sub => sub.status === 'cancelled').length,
+            totalMonthlySpend: subscriptions
+                .filter(sub => sub.status === 'active')
+                .reduce((total, sub) => {
+                    if (sub.frequency === 'monthly') return total + sub.price;
+                    if (sub.frequency === 'yearly') return total + (sub.price / 12);
+                    if (sub.frequency === 'daily') return total + (sub.price * 30);
+                    return total;
+                }, 0)
+        };
+        
         return res.status(200).json({ 
             success: true, 
-            data: subscriptions 
+            data: subscriptions,
+            analytics
         });
     } catch (error) {
         next(error);
@@ -125,6 +142,7 @@ export const getUpcomingRenewals = async (req, res, next) => {
         
         return res.status(200).json({
             success: true,
+            message: `${subscriptions.length} subscriptions renewing in next 7 days`,
             data: subscriptions
         });
     } catch (error) {
@@ -137,7 +155,7 @@ export const cancelSubscription = async (req, res, next) => {
     try {
         const subscription = await Subscription.findOneAndUpdate(
             { _id: req.params.id, userId: req.user._id },
-            { status: 'cancle' },
+            { status: 'cancelled' },
             { new: true }
         );
         
@@ -151,6 +169,58 @@ export const cancelSubscription = async (req, res, next) => {
             success: true,
             message: 'Subscription cancelled successfully',
             data: subscription
+        });
+    } catch (error) {
+        next(error);
+    }
+}
+
+// Get subscription analytics
+export const getAnalytics = async (req, res, next) => {
+    try {
+        const subscriptions = await Subscription.find({ userId: req.user._id });
+        
+        const analytics = {
+            totalSubscriptions: subscriptions.length,
+            activeSubscriptions: subscriptions.filter(sub => sub.status === 'active').length,
+            expiredSubscriptions: subscriptions.filter(sub => sub.status === 'expired').length,
+            cancelledSubscriptions: subscriptions.filter(sub => sub.status === 'cancelled').length,
+            
+            // Spending analytics
+            monthlySpend: subscriptions
+                .filter(sub => sub.status === 'active')
+                .reduce((total, sub) => {
+                    if (sub.frequency === 'monthly') return total + sub.price;
+                    if (sub.frequency === 'yearly') return total + (sub.price / 12);
+                    if (sub.frequency === 'daily') return total + (sub.price * 30);
+                    return total;
+                }, 0),
+                
+            yearlySpend: subscriptions
+                .filter(sub => sub.status === 'active')
+                .reduce((total, sub) => {
+                    if (sub.frequency === 'yearly') return total + sub.price;
+                    if (sub.frequency === 'monthly') return total + (sub.price * 12);
+                    if (sub.frequency === 'daily') return total + (sub.price * 365);
+                    return total;
+                }, 0),
+                
+            // Category breakdown
+            categoryBreakdown: subscriptions.reduce((acc, sub) => {
+                acc[sub.category] = (acc[sub.category] || 0) + 1;
+                return acc;
+            }, {}),
+            
+            // Currency breakdown
+            currencyBreakdown: subscriptions.reduce((acc, sub) => {
+                acc[sub.currency] = (acc[sub.currency] || 0) + sub.price;
+                return acc;
+            }, {})
+        };
+        
+        return res.status(200).json({
+            success: true,
+            data: analytics
         });
     } catch (error) {
         next(error);
