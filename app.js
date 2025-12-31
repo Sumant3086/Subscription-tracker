@@ -8,8 +8,13 @@ import subscriptionRouter from './routes/subscription.route.js';
 import userRouter from './routes/user.routes.js';
 import connectToDatabase from './database/mongodb.js';
 import errorMiddleware from './middleswares/error.middleware.js';
+import { generalLimiter } from './middleswares/rateLimiter.middleware.js';
 
 const app = express();
+
+// Apply rate limiting to all requests
+app.use(generalLimiter);
+
 app.use(express.json());
 app.use(express.urlencoded({extended:false}));
 app.use(cookieParser());
