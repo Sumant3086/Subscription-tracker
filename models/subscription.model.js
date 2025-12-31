@@ -2,14 +2,14 @@ import mongoose from 'mongoose';
 const subscriptionSchema=new mongoose.Schema({
     name:{
         type:String,
-        reqired:[true, 'Subscription name needed'],
+        required:[true, 'Subscription name needed'],
         trim:true,
         minLength:2,
         maxLength:50,
     }, 
     price:{
         type:Number,
-        reqired:[true, 'Subscription price needed'], 
+        required:[true, 'Subscription price needed'], 
         min:[0,' Price must be greater than 0'],
         max:[1000, 'Price must be smaller than 1000']  
     },
@@ -25,11 +25,11 @@ const subscriptionSchema=new mongoose.Schema({
     category:{
         type:String,
         enum:['sports','news','tech'], 
-        require:true
+        required:true
     },
     payment:{
         type:String,
-        require:true,
+        required:true,
         trim:true 
     },
     status:{
@@ -55,7 +55,7 @@ const subscriptionSchema=new mongoose.Schema({
             message:'Renewal date must be in the past',
         }
     },
-    name:{
+    userId:{
         type:mongoose.Schema.Types.ObjectId, 
         ref:'User',
         required:true,
@@ -72,9 +72,9 @@ subscriptionSchema.pre('save',function(next){
             yearly:365,
         };
         this.renewalDate=new Date(this.startDate);
-        this.renewalDate.setDate(this.renewalDate.getDate()+renewalPeriods[this.freqency]);
+        this.renewalDate.setDate(this.renewalDate.getDate()+renewalPeriods[this.frequency]);
     }
-    if(this.renewalDate<newDate()){
+    if(this.renewalDate<new Date()){
         this.status='expired';
     }
     next();

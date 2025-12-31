@@ -2,14 +2,14 @@ import mongoose from 'mongoose';
 const userSchema=new mongoose.Schema({
     name:{
         type:String,
-        reqired:[true, 'User name needed'],
+        required:[true, 'User name needed'],
         trim:true,
         minLength:2,
         maxLength:50,
     },
     email:{
         type:String,
-        reqired:[true, 'User mail needed'],
+        required:[true, 'User mail needed'],
         trim:true,
         unique:true,
         lowercase:true,
@@ -17,7 +17,7 @@ const userSchema=new mongoose.Schema({
     },
     password:{
         type:String,
-        reqired:[true, 'User password needed'], 
+        required:[true, 'User password needed'], 
         minLength:6, 
     }
 },{timestamps:true});
