@@ -26,6 +26,14 @@ app.get('/', (req, res) => {
   res.send('Welcome to the Subscription Tracker API!');
 });
 
+// 404 handler - must be after all other routes
+app.use('*', (req, res) => {
+  res.status(404).json({
+    success: false,
+    message: `Route ${req.originalUrl} not found`
+  });
+});
+
 app.listen(PORT, async() => {
   console.log(`Subscription Tracker API is running on http://localhost:${PORT}`);
   await connectToDatabase();
