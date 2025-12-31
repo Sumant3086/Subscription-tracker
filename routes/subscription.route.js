@@ -1,0 +1,11 @@
+import {Router} from 'express';
+const subscriptionRouter=Router();  
+subscriptionRouter.get('/',(req,res)=>res.send({title:'Get all subscription'}));
+subscriptionRouter.get('/:id',(req,res)=>res.send({title:'Get subscription details'}));
+subscriptionRouter.post('/',(req,res)=>res.send({title:'Create a subscription'}));
+subscriptionRouter.put('/',(req,res)=>res.send({title:'Update a subscription'}));
+subscriptionRouter.delete('/',(req,res)=>res.send({title:'Delete a subscription'}));
+subscriptionRouter.get('/user/:id',(req,res)=>res.send({title:'Get all user subscription'}));
+subscriptionRouter.get('/user/cancel',(req,res)=>res.send({title:'Cancel subscription'}));
+subscriptionRouter.get('/upcomming-renewals',(req,res)=>res.send({title:'Comming subscription'}));
+export default subscriptionRouter;
